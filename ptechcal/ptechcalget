@@ -1,0 +1,1 @@
+* 0,12 * * * [user_name] wget -q -O /var/www/programing/ptechcal/work/ptechevent.ics http://sp.snicker-jp.info/ptechcal/work/ical.php
