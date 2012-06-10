@@ -42,8 +42,12 @@ $location[] = h($hit->category[2]);
 //header("Content-Type: text/Calendar");
 //header("Content-Disposition: inline; filename=snickerjp.ics");
 require_once './iCalcreator.class.php';
-$v = new vcalendar( array( 'unique_id' => 'snicker-jp.info' ));
+$v = new vcalendar( array( 
+	'unique_id' => 'snicker-jp.info',
+));
                                                 // initiate new CALENDAR
+$v->setProperty( 'calscale'
+               , 'GREGORIAN' );
 $v->setProperty( 'method'
                , 'PUBLISH' );
 $v->setProperty( 'X-WR-CALNAME'
@@ -54,7 +58,8 @@ $v->setProperty( 'X-WR-CALDESC'
                , 'パソナテックのイベントRSSをiCal形式に変換しました！（※現在テストUP中です。）' );
 foreach ($title as $key => $value) {
 //$pattern = '/[0-9][0-9][0-9][0-9]\\/[0-9][0-9]\\/[0-9][0-9]\(.*\)/';
-$pattern = '/[0-9][0-9][0-9][0-9]\\/[0-9][0-9]\\/[0-9][0-9].*[0-9][0-9]:.*:[0-9][0-9]/';
+//$pattern = '/[0-9][0-9][0-9][0-9]\\/[0-9][0-9]\\/[0-9][0-9].*[0-9][0-9]:.*:[0-9][0-9]/';
+$pattern = '/\d{4}\\/\d{2}\\/\d{2}.*\d{2}:.*:\d{2}/';
 preg_match($pattern, $description[$key], $matches);
 $split_pattern = '/[\s-\/:]+|\(.*\)[\s]+/';
 $split_pattern = '/[\D]+|\(.*\)[\s]+/';
@@ -63,7 +68,11 @@ $split_matches = preg_split($split_pattern, $matches[0]);
 $pattern2 = '/\\[.*\\][\s]+/';
 preg_match($pattern2, $title[$key], $matches2);
 $sym = array("[", "]");
-$matches2 = str_replace($sym, "", $matches2[0]);
+$matches2 = trim(str_replace($sym, "", $matches2[0]));
+
+$dtstart = $split_matches[0].$split_matches[1].$split_matches[2].$split_matches[3].$split_matches[4];
+//$hashlocation = sha1($matches2);
+$hashlocation = md5($title[$key]);
 
 $e = & $v->newComponent( 'vevent' );           // initiate a new EVENT
 $e->setProperty( 'DTSTART'
@@ -76,6 +85,10 @@ $e->setProperty( 'CREATED'
 $e->setProperty( 'description'
                , $description[$key] );    // describe the event
 */
+$e->setProperty( 'uid'
+               //, $dtstart.hash($matches2).'@snicker-jp.info');
+               , "$dtstart-$hashlocation@snicker-jp.info");
+               //, $start );    // uid
 $e->setProperty( 'description'
                , $linkurl[$key] );    // describe the event
 $e->setProperty( 'LAST-MODIFIED'
